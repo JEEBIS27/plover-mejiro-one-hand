@@ -1,3 +1,5 @@
 {
-  "IU-":"=undo"
+    "IU-":"=undo",
+    "S-": "}{#Escape}{",
+    "SK-": "}{#Return}{"
 }
