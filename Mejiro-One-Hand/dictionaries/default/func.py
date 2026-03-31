@@ -1,0 +1,160 @@
+import re
+from Mejiro.dictionaries.default.settings import (DIPHTHONG_MAPPING, ENGLISH_DIPHTHONG_MAPPING, MINOR_DIPHTHONG_MAPPING, EXCEPTION_KANA_MAP,
+                                                  conso_stroke_to_roma, vowel_stroke_to_roma, ROMA_TO_KANA_MAP,
+                                                  PARTICLE_KEY_LIST, SECOND_SOUND_LIST,
+                                                  PARTICLE_MAP)
+from Mejiro.dictionaries.default.abbreviations import ABSTRACT_MAP, ABSTRACT_MAP_LEFT, ABSTRACT_MAP_RIGHT
+
+global LAST_VOWEL_STROKE
+LAST_VOWEL_STROKE = ''
+
+def get_conso(conso_stroke: str) -> str:
+    global conso_stroke_to_roma
+    # 子音ストロークからローマ字の子音（行）を取得
+    return next((roma for stroke, roma in conso_stroke_to_roma if conso_stroke == stroke), "")
+
+
+def stroke_to_kana(conso_stroke: str, vowel_stroke: str) -> str:
+
+    global ROMA_TO_KANA_MAP
+    global vowel_stroke_to_roma
+    global LAST_VOWEL_STROKE
+
+    if not LAST_VOWEL_STROKE:
+        LAST_VOWEL_STROKE = "A"
+    # 母音ストロークの決定と更新
+    if not vowel_stroke:
+        current_vowel_stroke = LAST_VOWEL_STROKE
+    else:
+        current_vowel_stroke = vowel_stroke
+        LAST_VOWEL_STROKE = vowel_stroke
+
+    # 例外処理
+    if conso_stroke + vowel_stroke in ["", "STN"]:
+        return ""  # すべてのストロークが空、STNの場合、空文字を返す
+    elif conso_stroke + vowel_stroke in EXCEPTION_KANA_MAP: # 例外的なかなのマッピングをチェック
+        kana = EXCEPTION_KANA_MAP[conso_stroke + vowel_stroke]
+        return kana
+    else:
+        # 母音ストロークからローマ字の基本母音（段）と長音文字を決定
+        vowel_roma = None
+        suffix = "" # 長音文字
+
+        # 基本の二重母音マッピングをチェック
+        if current_vowel_stroke in DIPHTHONG_MAPPING:
+            vowel_roma, suffix = DIPHTHONG_MAPPING[current_vowel_stroke]
+            vowel_index = [item[1] for item in vowel_stroke_to_roma].index(vowel_roma)
+        # それ以外の場合、基本母音ストロークから取得
+        else:
+            vowel_tuple = next(((i, roma) for i, (stroke, roma) in enumerate(vowel_stroke_to_roma) if current_vowel_stroke == stroke), None)
+            if vowel_tuple is not None:
+                vowel_index, vowel_roma = vowel_tuple
+            suffix = "" # 基本母音には長音文字なし
+
+        # 子音をローマ字で入手
+        conso_roma = get_conso(conso_stroke)
+
+        try:
+            # ローマ字からかなに変換
+            base_kana = ROMA_TO_KANA_MAP[conso_roma][vowel_index]
+        except IndexError:
+            print(f"無効な組み合わせ: 子音'{conso_roma}' + 母音'{vowel_roma}'")
+            raise KeyError
+
+        return base_kana + suffix
+
+def stroke_to_syllable(conso_stroke: str, vowel_stroke: str, particle_stroke: str) -> str:
+
+    global LAST_VOWEL_STROKE
+    global DIPHTHONG_MAPPING
+    global ENGLISH_DIPHTHONG_MAPPING
+    global MINOR_DIPHTHONG_MAPPING
+    global ROMA_TO_KANA_MAP
+    global PARTICLE_KEY_LIST
+    global SECOND_SOUND_LIST
+    global is_first_input
+
+    if not LAST_VOWEL_STROKE:
+        LAST_VOWEL_STROKE = "A"
+    # 母音ストロークの決定と更新
+    if not vowel_stroke:
+        current_vowel_stroke = LAST_VOWEL_STROKE
+    else:
+        current_vowel_stroke = vowel_stroke
+        LAST_VOWEL_STROKE = vowel_stroke
+
+    # 例外処理
+    if conso_stroke + vowel_stroke + particle_stroke == "":
+        return ""
+    elif conso_stroke + vowel_stroke in ['', "STN"]:
+        return SECOND_SOUND_LIST[PARTICLE_KEY_LIST.index(particle_stroke)]
+    elif conso_stroke + vowel_stroke in EXCEPTION_KANA_MAP and current_vowel_stroke + particle_stroke not in ENGLISH_DIPHTHONG_MAPPING: # 例外的なかなのマッピングをチェック
+        base_kana = EXCEPTION_KANA_MAP[conso_stroke + vowel_stroke]
+        extra_sound = SECOND_SOUND_LIST[PARTICLE_KEY_LIST.index(particle_stroke)]
+        return base_kana + extra_sound
+    else:
+        # 母音ストロークからローマ字の基本母音（段）と長音文字を決定
+        vowel_roma = None
+        suffix = "" # 長音文字
+
+        # 英語フラグをリセット
+        is_english = False
+
+        # 英語母音マッピングをチェック
+        if current_vowel_stroke + particle_stroke in ENGLISH_DIPHTHONG_MAPPING:
+            vowel_roma, suffix = ENGLISH_DIPHTHONG_MAPPING[current_vowel_stroke + particle_stroke]
+            vowel_index = [item[1] for item in vowel_stroke_to_roma].index(vowel_roma)
+            extra_sound = ""  # 追加音はなし
+            is_english = True # 英語モードフラグを立てる
+        elif current_vowel_stroke + particle_stroke in MINOR_DIPHTHONG_MAPPING:
+            vowel_roma, suffix = MINOR_DIPHTHONG_MAPPING[current_vowel_stroke + particle_stroke]
+            vowel_index = [item[1] for item in vowel_stroke_to_roma].index(vowel_roma)
+            extra_sound = ""  # 追加音はなし
+        # 基本の二重母音マッピングをチェック
+        elif current_vowel_stroke in DIPHTHONG_MAPPING:
+            vowel_roma, suffix = DIPHTHONG_MAPPING[current_vowel_stroke]
+            vowel_index = [item[1] for item in vowel_stroke_to_roma].index(vowel_roma)
+            # 辞書から直接対応する文字列を取得。
+            extra_sound = SECOND_SOUND_LIST[PARTICLE_KEY_LIST.index(particle_stroke)]
+        # それ以外の場合、基本母音ストロークから取得
+        else:
+            vowel_tuple = next(((i, roma) for i, (stroke, roma) in enumerate(vowel_stroke_to_roma) if current_vowel_stroke == stroke), None)
+            if vowel_tuple is not None:
+                vowel_index, vowel_roma = vowel_tuple
+            suffix = "" # 基本母音には長音文字なし
+            # 辞書から直接対応する文字列を取得。
+            extra_sound = SECOND_SOUND_LIST[PARTICLE_KEY_LIST.index(particle_stroke)]
+
+        if vowel_roma is None:
+            print(f"母音ストローク '{current_vowel_stroke}' が見つかりません")
+            raise KeyError
+
+        # 子音をローマ字で入手
+        conso_roma = get_conso(conso_stroke)
+
+        try:
+            base_kana = ROMA_TO_KANA_MAP[conso_roma][vowel_index]
+            if is_english:
+                base_kana = base_kana.replace('ぁ', 'すた').replace('ぃ', 'すち').replace('ぅ', 'すてぃ').replace('ぇ', 'すて').replace('ぉ', 'すと').replace('ち', 'てぃ').replace('ぢ', 'でぃ').replace('づ', 'どぅ')
+                if base_kana + suffix == "るしょん":
+                    base_kana, suffix = "りゅ", "ーしょん"
+                elif base_kana + suffix == "ふしょん":
+                    base_kana, suffix = "ふゅ", "ーじょん"
+        except IndexError:
+            print(f"無効な組み合わせ: 子音'{conso_roma}' + 母音'{vowel_roma}'")
+            raise KeyError
+
+        return base_kana + suffix + extra_sound
+
+def joshi(particle_stroke: str) -> str:
+    joshi = PARTICLE_MAP[particle_stroke]
+    return joshi
+
+def abstract_abbreviation_lookup(left_kana_stroke: str, right_kana_stroke: str) -> str:
+    if left_kana_stroke + '-' + right_kana_stroke in ABSTRACT_MAP:
+        output = ABSTRACT_MAP[left_kana_stroke + '-' + right_kana_stroke]
+    elif left_kana_stroke in ABSTRACT_MAP_LEFT and right_kana_stroke in ABSTRACT_MAP_RIGHT:
+        output = ABSTRACT_MAP_LEFT[left_kana_stroke] + ABSTRACT_MAP_RIGHT[right_kana_stroke]
+    else:
+        output = ""
+    return output
