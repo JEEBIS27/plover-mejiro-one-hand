@@ -43,23 +43,17 @@ def lookup(key):
     assert len(key) <= LONGEST_KEY
     stroke = key[0]
 
-    if stroke == "n#":
-        if is_typing_mode:
-            print("typing mode off")
-        else:
-            print("typing mode on")
-        is_typing_mode = not is_typing_mode
-
-    regex = re.compile(r"(S?T?K?N?)(Y?I?A?U?)(n?t?k?)(-)(\*?)")
+    regex = re.compile(r"(S?T?K?N?)(Y?I?A?U?)(n?t?k?)(\-?)(\*?)")
     regex_groups = re.search(regex, stroke)
 
     conso_stroke = regex_groups.group(1)
     vowel_stroke = regex_groups.group(2)
     particle_stroke = regex_groups.group(3)
+    hypen = regex_groups.group(4)
     asterisk = regex_groups.group(5)
     kana_stroke = conso_stroke + vowel_stroke
     syllable_stroke = conso_stroke + vowel_stroke + particle_stroke
-    raw_stroke = conso_stroke + vowel_stroke + particle_stroke + '-' + asterisk
+    raw_stroke = conso_stroke + vowel_stroke + particle_stroke + hypen + asterisk
 
     result = "" # 初期化
 
@@ -73,16 +67,17 @@ def lookup(key):
     mini_joshi = joshi(particle_stroke)
 
     message = ""
+
     # メインの変換処理
-    if raw_stroke in USERS_MAP and asterisk: # ユーザー略語
+    if raw_stroke in USERS_MAP: # ユーザー略語
         result = USERS_MAP[raw_stroke]
         message = "ユーザー辞書"
-    elif kana_stroke is None and joshi and not asterisk: # 助詞
+    elif not kana_stroke and not asterisk: # 助詞
         result = mini_joshi
         message = "助詞"
     elif asterisk:
         # 動詞変換処理
-        verb = stroke_to_verb(kana, syllable, right_kana, stroke_list)
+        verb = stroke_to_verb(kana, syllable, conso_stroke, vowel_stroke, particle_stroke)
         # 動詞略語
         if verb:
             result = verb
@@ -94,10 +89,10 @@ def lookup(key):
 
     # タイピングゲーム時の変換処理
     if is_typing_mode:
-        translated_result = kana_to_typing_output(result, typing_mode)
+        translated_result = kana_to_typing_output(result, 0)
         result = translated_result
 
-    if stroke == "STKNYIAUntk-*":
+    if raw_stroke == "STKNYIAUntk-*":
         message = "出力取止"
         result = ""
     # デバッグ画面に入力と結果を表示
