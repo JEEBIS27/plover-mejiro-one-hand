@@ -64,7 +64,7 @@ KEYMAPS = {
         'arpeggiate' : 'Return'
         }
 }
-DICTIONARIES_ROOT = 'asset:Mejiro-One-Hand:dictionaries/default'
+DICTIONARIES_ROOT = 'asset:Mejiro_One_Hand:dictionaries/default'
 DEFAULT_DICTIONARIES = ('mejiro_users.json','mejiro_commands.json','mejiro.py')
 
 

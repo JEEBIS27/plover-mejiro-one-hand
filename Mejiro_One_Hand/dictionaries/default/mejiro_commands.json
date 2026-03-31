@@ -1,5 +1,5 @@
 {
     "IU-":"=undo",
-    "S-": "}{#Escape}{",
-    "SK-": "}{#Return}{"
+    "S-": "{#Escape}",
+    "SK-": "{#Return}"
 }

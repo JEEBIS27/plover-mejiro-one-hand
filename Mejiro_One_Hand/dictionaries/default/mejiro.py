@@ -11,14 +11,14 @@
 #                         └─────┴─────┘
 
 import re
-from Mejiro.dictionaries.default.settings import conso_stroke_to_roma
-from Mejiro.dictionaries.default.func import (stroke_to_kana, stroke_to_syllable, joshi)
-from Mejiro.dictionaries.default.abbreviations import USERS_MAP
-from Mejiro.dictionaries.default.verb import stroke_to_verb
-from Mejiro.dictionaries.default.translate import kana_to_typing_output
+from Mejiro_One_Hand.dictionaries.default.settings import conso_stroke_to_roma
+from Mejiro_One_Hand.dictionaries.default.func import (stroke_to_kana, stroke_to_syllable, joshi)
+from Mejiro_One_Hand.dictionaries.default.abbreviations import USERS_MAP
+from Mejiro_One_Hand.dictionaries.default.verb import stroke_to_verb
+from Mejiro_One_Hand.dictionaries.default.translate import kana_to_typing_output
 
 # ファイル構成
-# Mejiro ┬ system.py
+# Mejiro_One_Hand ┬ system.py
 #        └ dictionaries ─ default ┬ mejiro.py
 #                                 ├ mejiro_commands.json
 #                                 ├ mejiro_users.json

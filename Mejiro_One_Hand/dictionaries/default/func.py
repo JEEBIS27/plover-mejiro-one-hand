@@ -1,9 +1,8 @@
 import re
-from Mejiro.dictionaries.default.settings import (DIPHTHONG_MAPPING, ENGLISH_DIPHTHONG_MAPPING, MINOR_DIPHTHONG_MAPPING, EXCEPTION_KANA_MAP,
+from Mejiro_One_Hand.dictionaries.default.settings import (DIPHTHONG_MAPPING, ENGLISH_DIPHTHONG_MAPPING, MINOR_DIPHTHONG_MAPPING, EXCEPTION_KANA_MAP,
                                                   conso_stroke_to_roma, vowel_stroke_to_roma, ROMA_TO_KANA_MAP,
                                                   PARTICLE_KEY_LIST, SECOND_SOUND_LIST,
                                                   PARTICLE_MAP)
-from Mejiro.dictionaries.default.abbreviations import ABSTRACT_MAP, ABSTRACT_MAP_LEFT, ABSTRACT_MAP_RIGHT
 
 global LAST_VOWEL_STROKE
 LAST_VOWEL_STROKE = ''
@@ -150,11 +149,3 @@ def joshi(particle_stroke: str) -> str:
     joshi = PARTICLE_MAP[particle_stroke]
     return joshi
 
-def abstract_abbreviation_lookup(left_kana_stroke: str, right_kana_stroke: str) -> str:
-    if left_kana_stroke + '-' + right_kana_stroke in ABSTRACT_MAP:
-        output = ABSTRACT_MAP[left_kana_stroke + '-' + right_kana_stroke]
-    elif left_kana_stroke in ABSTRACT_MAP_LEFT and right_kana_stroke in ABSTRACT_MAP_RIGHT:
-        output = ABSTRACT_MAP_LEFT[left_kana_stroke] + ABSTRACT_MAP_RIGHT[right_kana_stroke]
-    else:
-        output = ""
-    return output

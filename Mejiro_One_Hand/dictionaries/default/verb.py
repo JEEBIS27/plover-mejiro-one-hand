@@ -1,6 +1,6 @@
-from Mejiro.dictionaries.default.settings import DOT
-from Mejiro.dictionaries.default.func import get_conso
-from Mejiro.dictionaries.default.abbreviations import VERB_KAMI_MAP, VERB_SIMO_MAP, VERB_GODAN_MAP
+from Mejiro_One_Hand.dictionaries.default.settings import DOT
+from Mejiro_One_Hand.dictionaries.default.func import get_conso
+from Mejiro_One_Hand.dictionaries.default.abbreviations import VERB_KAMI_MAP, VERB_SIMO_MAP, VERB_GODAN_MAP
 
 CONJUGATE_GODAN_MAP = { # (五段活用限定)
     #行: [0.ない形, 1.使役形, 2.受身形, 3.ます形, 4.辞書形, 5.て・た形, 6.意向形, 7.仮定形, 8.可能形, 9.命令形]
